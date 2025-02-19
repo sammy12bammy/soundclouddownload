@@ -66,10 +66,12 @@ def convert_to_high_quality_mp3(directory):
             os.remove(input_path)
 
 # Step 1: Ensure pip is installed
+print("Checking pip")
 if not is_installed("pip"):
     install_pip()
 
 # Step 2: Check and install scdl and ffmpeg
+print("Checking scdl and ffmpeg")
 if not is_installed("scdl"):
     install_scdl()
 
