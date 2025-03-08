@@ -2,6 +2,7 @@ import os
 import sys
 import subprocess
 import platform
+import time
 
 def get_desktop_path():
     """Get the desktop path for different operating systems."""
@@ -52,6 +53,11 @@ def install_ffmpeg():
     elif system == "Linux":
         subprocess.run(["sudo", "apt", "install", "-y", "ffmpeg"], check=True)
 
+#currently not in use, impliment when you get working with low qualilty
+#
+#
+#
+#
 def convert_to_high_quality_mp3(directory):
     """Convert all non-MP3 files in the directory to 320kbps MP3 using ffmpeg."""
     for filename in os.listdir(directory):
@@ -65,30 +71,40 @@ def convert_to_high_quality_mp3(directory):
             # Optional: Delete the original non-MP3 file after conversion
             os.remove(input_path)
 
-# Step 1: Ensure pip is installed
-print("Checking pip")
-if not is_installed("pip"):
-    install_pip()
+def download_song(url):
+    songs_folder = create_songs_folder()
+    command = f"scdl -l {url} -o \"{songs_folder}\" --path-template \"%(title)s.%(ext)s\" --onlymp3"
+    process = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-# Step 2: Check and install scdl and ffmpeg
-print("Checking scdl and ffmpeg")
-if not is_installed("scdl"):
-    install_scdl()
+    if process.returncode == 0:
+        print("Download complete!")
+    else:
+        print("Error: Download failed.", process.stderr.decode())
 
-if not is_installed("ffmpeg"):
-    install_ffmpeg()
 
-# Step 3: Create the "songs" folder on the Desktop
-songs_folder = create_songs_folder()
+def instal_dependencys():
+    # Step 1: Ensure pip is installed
+    print("Checking pip")
+    if not is_installed("pip"):
+        install_pip()
 
-# Step 4: Download a SoundCloud song
-soundcloud_url = input("Enter SoundCloud song or playlist URL: ")
+    # Step 2: Check and install scdl and ffmpeg
+    print("Checking scdl and ffmpeg")
+    if not is_installed("scdl"):
+        install_scdl()
 
-command = f"scdl -l {soundcloud_url} -o \"{songs_folder}\" --path-template \"%(title)s.%(ext)s\" --onlymp3"
-os.system(command)
+    if not is_installed("ffmpeg"):
+        install_ffmpeg()
 
-# Step 5: Convert to high-quality 320kbps MP3 if needed
-convert_to_high_quality_mp3(songs_folder)
+#start of main function
+if __name__ == "__main__":
+    #ensure program is taking in a url
+    if len(sys.argv) < 2:
+        print("Error: No URL provided.")
+        sys.exit(1)
+    instal_dependencys()
 
-print(f"Download complete! Check the '{songs_folder}' folder on your Desktop.")
-
+    #actual downloading
+    soundcloud_url = sys.argv[1]
+    download_song(soundcloud_url)
+    print(f"Download complete! Check the folder on your Desktop.")
